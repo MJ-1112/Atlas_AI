@@ -19,13 +19,13 @@ app.post("/ask", async (req, res) => {
     if (!question) {
       return res.status(400).json({ error: "Question is required" });
     }
-
+-
 async function main() {
   const response = await ai.models.generateContent({
     model: "gemini-2.5-flash",
     contents: question,
   });
-  console.log(response.text);
+
   res.status(200).json({ answer: response.text });
 
 }
