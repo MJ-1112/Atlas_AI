@@ -2,7 +2,7 @@ import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import multer from "multer";
-import { pdf } from "pdf-parse";
+import  pdf  from "pdf-parse";
 import officeParser from "officeparser";
 import fs from "fs";
 import cors from "cors"; // ✅ import cors
