@@ -1,0 +1,23 @@
+h1 {
+    color: azure;
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: 35px;
+    width: 450px;
+}
+
+.content {
+    display: -webkit-flex;
+    display: flex;
+    -webkit-align-items: center;
+    align-items: center;
+    -webkit-justify-content: center;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.google-button {
+    position: absolute;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
