@@ -2,117 +2,106 @@ import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import multer from "multer";
-import pdfParse from "pdf-parse";
+import { pdf } from "pdf-parse";
 import officeParser from "officeparser";
 import fs from "fs";
-import cors from "cors";
-import path from "path";
+import cors from "cors"; // ✅ import cors
 
 dotenv.config();
 console.log("Loaded key:", process.env.GEMINI_API_KEY ? "✅ Found" : "❌ Not found");
 
 const app = express();
 
-// ✅ Enable CORS for frontend
-const allowedOrigins = [
-  "https://atlas-ai-dun.vercel.app", // your deployed frontend
-  "http://localhost:5173", // local dev
-];
-
+// ✅ Enable CORS for your deployed frontend
 app.use(cors({
-  origin: (origin, callback) => {
-    if (!origin) return callback(null, true);
-    if (!allowedOrigins.includes(origin)) {
-      return callback(new Error("CORS not allowed"), false);
-    }
-    return callback(null, true);
-  },
-  credentials: true,
+  origin: "https://atlas-ai-dun.vercel.app", // deployed frontend
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
 }));
 
-app.use(express.json());
-
-// Multer setup for file uploads
+app.use(express.json()); 
 const upload = multer({ dest: "uploads/" });
+let text = "";
 
-// Health check
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-let uploadedText = "";
+app.post('/uploads', upload.single("file"), async (req, res) => {
+    try {
+        const file = req.file;
+        if (!file) {
+            return res.status(402).json({ message: "No file uploaded" });
+        }
 
-// Upload route
-app.post("/uploads", upload.single("file"), async (req, res) => {
-  try {
-    const file = req.file;
-    if (!file) return res.status(400).json({ message: "No file uploaded" });
+        // pdf file
+        if (file.mimetype == "application/pdf") {
+            const dataBuffer = fs.readFileSync(file.path);
+            const pdfData = await pdf(dataBuffer);
+            text = pdfData.text;
+            res.status(202).json({ message: "PDF uploaded and read successfully" });
+        }
 
-    if (file.mimetype === "application/pdf") {
-      const dataBuffer = fs.readFileSync(file.path);
-      const pdfData = await pdfParse(dataBuffer);
-      uploadedText = pdfData.text;
-      fs.unlinkSync(file.path);
-      return res.status(200).json({ message: "PDF uploaded and read successfully" });
-    } else if (file.mimetype === "application/vnd.openxmlformats-officedocument.presentationml.presentation") {
-      const pptText = await officeParser.parseOfficeAsync(file.path);
-      uploadedText = pptText;
-      fs.unlinkSync(file.path);
-      return res.status(200).json({ message: "PPT uploaded and read successfully" });
-    } else {
-      fs.unlinkSync(file.path);
-      return res.status(415).json({ error: "File type not supported" });
+        // ppt file
+        else if (file.mimetype === "application/vnd.openxmlformats-officedocument.presentationml.presentation") {
+            const pptText = await officeParser.parseOfficeAsync(file.path);
+            text = pptText;
+            res.status(202).json({ message: "PPT uploaded and read successfully" });
+        }
+        else {
+            res.status(501).json({ error: "File type not compatible" });
+        }
+
+        fs.unlinkSync(file.path);
+
+    } catch (error) {
+        return res.status(400).json({ error });
     }
-  } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Failed to process file" });
-  }
 });
 
-// Initialize Google AI client
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const ai = new GoogleGenAI({});
 
-// Ask route
 app.post("/ask", async (req, res) => {
-  try {
-    const { question } = req.body;
-    if (!question) return res.status(400).json({ error: "Question is required" });
+    try {
+        const { question } = req.body;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: question,
-    });
+        if (!question) {
+            return res.status(400).json({ error: "Question is required" });
+        }
 
-    res.status(200).json({ answer: response.text });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Something went wrong" });
-  }
+        async function main() {
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: question,
+            });
+
+            res.status(200).json({ answer: response.text });
+        }
+
+        main();
+
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Something went wrong" });
+    }
 });
 
-// Summarize route
-app.post("/summarize", async (req, res) => {
-  try {
-    if (!uploadedText) return res.status(400).json({ error: "No text uploaded to summarize" });
+app.post('/summarize', async (req, res) => {
+    const prompt = `Summarize this for me in simple words as I am a student and you are a professional teacher teaching me, and make bullet points for last minute prep for the text: ${text}`;
 
-    const prompt = `Summarize this for me in simple words as I am a student and you are a professional teacher teaching me, make bullet points for last minute prep: ${uploadedText}`;
+    async function main() {
+        const response = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: prompt,
+        });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
+        res.status(200).json({ answer: response.text });
+    }
 
-    res.status(200).json({ answer: response.text });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Failed to summarize text" });
-  }
+    main();
 });
 
-// Use Render's dynamic port or default 3000
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`✅ App running on port ${PORT}`);
+    console.log(`✅ App is running on http://localhost:${PORT}`);
 });
