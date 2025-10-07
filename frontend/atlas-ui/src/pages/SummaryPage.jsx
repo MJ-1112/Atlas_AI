@@ -22,23 +22,30 @@ const SummaryPage = () => {
     formData.append("file", file);
 
     setIsLoading(true);
-    setSummary(""); // reset previous summary
+    setSummary(""); // reset old summary
 
     try {
-      // 1️⃣ Upload file first
-      await axios.post("https://atlas-ai-33l9.onrender.com/uploads", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      // 1️⃣ Upload the file
+      const uploadRes = await axios.post(
+        "https://atlas-ai-33l9.onrender.com/uploads",
+        formData,
+        {
+          headers: { "Content-Type": "multipart/form-data" },
+        }
+      );
 
-      // 2️⃣ Then call summarize (backend reads stored text from previous step)
-      const res = await axios.post(
+      console.log("Upload response:", uploadRes.data);
+
+      // 2️⃣ Then summarize (after upload success)
+      const summarizeRes = await axios.post(
         "https://atlas-ai-33l9.onrender.com/summarize"
       );
 
-      setSummary(res.data.answer || "No summary generated.");
+      console.log("Summarize response:", summarizeRes.data);
+      setSummary(summarizeRes.data.answer || "No summary generated.");
     } catch (err) {
-      console.error(err);
-      setSummary("Error summarizing document.");
+      console.error("Upload/Summarize error:", err);
+      setSummary("Error summarizing document. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -78,7 +85,11 @@ const SummaryPage = () => {
         onClick={handleUploadAndSummarize}
         disabled={isLoading}
       >
-        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Upload & Summarize"}
+        {isLoading ? (
+          <CircularProgress size={24} color="inherit" />
+        ) : (
+          "Upload & Summarize"
+        )}
       </Button>
 
       {summary && (
