@@ -22,6 +22,10 @@ app.use(cors({
 app.use(express.json()); 
 const upload = multer({ dest: "uploads/" });
 let text = "";
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 
 app.post('/uploads', upload.single("file"), async (req, res) => {
     try {
