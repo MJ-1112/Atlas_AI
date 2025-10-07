@@ -14,7 +14,7 @@ const app = express();
 
 // ✅ Enable CORS
 app.use(cors({
-  origin: "https://atlas-ai-dun.vercel.app/", 
+  origin: "https://atlas-ai-dun.vercel.app", 
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
