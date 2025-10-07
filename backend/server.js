@@ -2,10 +2,10 @@ import express from "express";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 import multer from "multer";
-import  pdf  from "pdf-parse";
+import  {pdf}  from "pdf-parse";
 import officeParser from "officeparser";
 import fs from "fs";
-import cors from "cors"; // ✅ import cors
+import cors from "cors"; 
 
 dotenv.config();
 console.log("Loaded key:", process.env.GEMINI_API_KEY ? "✅ Found" : "❌ Not found");
