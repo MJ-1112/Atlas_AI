@@ -1,23 +1,97 @@
-h1 {
-    color: azure;
-    font-family: Georgia, 'Times New Roman', Times, serif;
-    font-size: 35px;
-    width: 450px;
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #262626;
+  font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: azure;
+  min-height: 100vh;
 }
 
+/* Wrapper */
+.home-wrapper {
+  width: 100%;
+  height: 100vh;
+}
+
+/* Desktop content */
+.desktop-view {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+}
+
+/* Mobile view hidden by default */
+.mobile-view {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  height: 100vh;
+  padding: 2rem;
+  color: white;
+}
+
+.mobile-view h2 {
+  font-size: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.mobile-view p {
+  color: #cccccc;
+  font-size: 1rem;
+}
+
+/* Main layout */
 .content {
-    display: -webkit-flex;
-    display: flex;
-    -webkit-align-items: center;
-    align-items: center;
-    -webkit-justify-content: center;
-    justify-content: center;
-    margin-top: 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  padding: 2rem;
+  text-align: left;
 }
 
+/* Logo */
+.content img {
+  width: 180px;
+  height: auto;
+  object-fit: contain;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 0 5px rgba(0, 0, 0, 0.4));
+}
+
+.content img:hover {
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 15px rgba(100, 180, 255, 0.5));
+}
+
+/* Heading */
+.content h1 {
+  font-weight: 600;
+  font-size: clamp(1.8rem, 1.5vw + 1rem, 2.5rem);
+  max-width: 700px;
+  line-height: 1.4;
+  margin: 0;
+  color: #f0f0f0;
+}
+
+/* Google Button */
 .google-button {
-    position: absolute;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 1rem;
+}
+
+/* Hide desktop view for small screens */
+@media (max-width: 900px) {
+  .desktop-view {
+    display: none;
+  }
+
+  .mobile-view {
+    display: flex;
+  }
 }

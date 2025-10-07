@@ -5,12 +5,29 @@ import GoogleButton from '../components/googlebutton'
 
 function Home() {
   return (
-    <div className='content'>
-        <img src={LOGO} alt="Atlas AI Logo" />
-        <h1>Welcome to Atlas AI, one stop solution to your last minute exam prep</h1>
-        <GoogleButton className="google-button" />
+    <div className="home-wrapper">
+      {/* Desktop View */}
+      <div className="desktop-view">
+        <div className="content">
+          <img src={LOGO} alt="Atlas AI Logo" />
+          <div>
+            <h1>
+              Welcome to Atlas AI, your one-stop solution for last-minute exam prep
+            </h1>
+            <div className="google-button">
+              <GoogleButton />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile/Tablet Block Message */}
+      <div className="mobile-view">
+        <h2>📱 Atlas AI is only available on desktop devices.</h2>
+        <p>Please visit on a larger screen for the full experience.</p>
+      </div>
     </div>
   )
 }
 
-export default Home 
+export default Home

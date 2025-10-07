@@ -15,6 +15,6 @@ const ChatPage = () => {
       </Box>
     </Box>
   );
-};
+};  
 
 export default ChatPage;
