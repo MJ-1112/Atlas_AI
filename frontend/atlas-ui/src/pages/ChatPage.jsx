@@ -1,20 +1,17 @@
-import React from 'react';
-import Sidebar from '../components/Sidebar';
-import ChatBox from '../components/ChatBox';
-import { Box } from '@mui/material';
+// src/pages/ChatPage.jsx
+import React from "react";
+import ChatBox from "../components/ChatBox";
+import Sidebar from "../components/sidebar";
 
 const ChatPage = () => {
   return (
-    <Box sx={{ display: 'flex', height: '100vh', bgcolor: '#262626' }}>
-      {/* Sidebar */}
-      <Sidebar />
+    <div style={{ color: "white", height: "100%", display: "flex", flexDirection: "column" }}>
 
-      {/* Chat area */}
-      <Box sx={{ flexGrow: 1, p: 2 }}>
-        <ChatBox />
-      </Box>
-    </Box>
+      <h2>Chat with Atlas AI</h2>
+      
+      <ChatBox />
+    </div>
   );
-};  
+};
 
 export default ChatPage;

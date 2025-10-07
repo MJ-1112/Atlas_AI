@@ -1,24 +1,35 @@
-import * as React from 'react';
-import Stack from '@mui/material/Stack';
-import Button from '@mui/material/Button';
+import React from 'react';
+import { Button } from '@mui/material';
+import { auth, googleProvider } from '../firebase';
+import { signInWithPopup } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 
-export default function GoogleButton() {
+const GoogleButton = ({ className }) => {
+  const navigate = useNavigate();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      const user = result.user;
+      console.log("User Info:", user);
+      alert(`Welcome ${user.displayName}`);
+      navigate('/chat'); // ✅ Redirect after login
+    } catch (error) {
+      console.error("Error signing in:", error);
+      alert("Google Sign-In failed");
+    }
+  };
+
   return (
-    <Stack spacing={4} direction="col" 
->
-      <Button variant="outlined"
-          style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        position: 'absolute',
-        bottom: '150px',
-        right:'500px',
-        width: '300px',
-        height:'50px',
-        fontSize:'15px'
-    }}>Sign in with Google</Button>
-    </Stack>
+    <Button
+      className={className}
+      variant="contained"
+      color="primary"
+      onClick={handleGoogleSignIn}
+    >
+      Sign in with Google
+    </Button>
   );
-}
+};
 
+export default GoogleButton;
