@@ -16,8 +16,11 @@
     "@mui/material": "^7.3.4",
     "@mui/styled-engine-sc": "^7.3.3",
     "@mui/system": "^7.3.3",
+    "axios": "^1.12.2",
     "firebase": "^12.3.0",
     "react-router-dom": "^7.9.3",
+    "react-simple-typewriter": "^5.0.1",
+    "react-typed": "^2.0.12",
     "styled-components": "^6.1.19"
   },
   "devDependencies": {

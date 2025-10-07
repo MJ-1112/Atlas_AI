@@ -1,47 +1,101 @@
-// src/pages/SummaryPage.jsx
-import React from "react";
-import { Box, Typography, Button } from "@mui/material";
-import UploadFileIcon from "@mui/icons-material/UploadFile";
-import Sidebar from "../components/sidebar";
+import React, { useState } from "react";
+import axios from "axios";
+import { Box, Typography, Button, CircularProgress } from "@mui/material";
+import { Typewriter } from "react-simple-typewriter";
 
 const SummaryPage = () => {
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    if (!["application/pdf", "application/vnd.openxmlformats-officedocument.presentationml.presentation"].includes(file.type)) {
-      alert("Only PDF and PPTX files are supported!");
+  const [file, setFile] = useState(null);
+  const [summary, setSummary] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  const handleUpload = async () => {
+    if (!file) {
+      alert("Please select a file first.");
       return;
     }
-    alert(`Uploaded: ${file.name}`);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    setIsLoading(true);
+    try {
+      const res = await axios.post("http://localhost:3000/summarize", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      setSummary(res.data.answer || "No summary generated."); // backend returns `answer`
+    } catch (err) {
+      console.error(err);
+      setSummary("Error summarizing document.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    
     <Box
       sx={{
+        height: "100vh",
+        bgcolor: "#262626",
         color: "white",
+        p: 3,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        height: "100%",
-        gap: 3,
+        textAlign: "center",
       }}
     >
-
-      <Typography variant="h5">Upload a file to summarize</Typography>
-      <Typography variant="body1" sx={{ opacity: 0.8 }}>
+      <Typography variant="h5" gutterBottom>
+        Upload your document for summarization
+      </Typography>
+      <Typography variant="body2" sx={{ color: "#aaa", mb: 2 }}>
         Only PDF and PPTX files supported
       </Typography>
+
+      <input
+        type="file"
+        accept=".pdf,.pptx"
+        onChange={handleFileChange}
+        style={{ marginBottom: "10px", color: "white" }}
+      />
+
       <Button
         variant="contained"
-        component="label"
-        startIcon={<UploadFileIcon />}
-        sx={{ backgroundColor: "#444" }}
+        color="primary"
+        onClick={handleUpload}
+        disabled={isLoading}
       >
-        Upload File
-        <input hidden type="file" onChange={handleFileUpload} />
+        {isLoading ? <CircularProgress size={24} color="inherit" /> : "Upload & Summarize"}
       </Button>
+
+      {summary && (
+        <Box
+          sx={{
+            mt: 4,
+            p: 2,
+            bgcolor: "#333",
+            borderRadius: 2,
+            width: "80%",
+            maxWidth: "700px",
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Summary
+          </Typography>
+          <Typewriter
+            words={[summary]}
+            loop={1}      
+            cursor
+            cursorStyle="_"
+            typeSpeed={25}
+          />
+        </Box>
+      )}
     </Box>
   );
 };
