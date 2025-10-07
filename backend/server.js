@@ -15,7 +15,7 @@ console.log("Loaded key:", process.env.GEMINI_API_KEY ? "✅ Found" : "❌ Not f
 const app = express();
 
 app.use(cors({
-  origin: "https://atlas-ai-dun.vercel.app", // your frontend URL
+  origin: "https://atlas-ai-dun.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -25,12 +25,12 @@ const upload = multer({ dest: "uploads/" });
 
 let text = "";
 
-// ✅ Health check route
+
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
 });
 
-// ✅ Upload route
+
 app.post("/uploads", upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -65,10 +65,10 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
   }
 });
 
-// ✅ Initialize AI
+
 const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// ✅ Ask route
+
 app.post("/ask", async (req, res) => {
   try {
     const { question } = req.body;
@@ -88,7 +88,7 @@ app.post("/ask", async (req, res) => {
   }
 });
 
-// ✅ Summarize route
+
 app.post("/summarize", async (req, res) => {
   try {
     if (!text) {
@@ -110,7 +110,6 @@ app.post("/summarize", async (req, res) => {
   }
 });
 
-// ✅ Server start
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`✅ Server running on http://localhost:${PORT}`);
