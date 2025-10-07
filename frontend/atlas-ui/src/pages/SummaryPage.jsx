@@ -12,7 +12,7 @@ const SummaryPage = () => {
     setFile(e.target.files[0]);
   };
 
-  const handleUpload = async () => {
+  const handleUploadAndSummarize = async () => {
     if (!file) {
       alert("Please select a file first.");
       return;
@@ -22,12 +22,20 @@ const SummaryPage = () => {
     formData.append("file", file);
 
     setIsLoading(true);
+    setSummary(""); // reset previous summary
+
     try {
-      const res = await axios.post("https://atlas-ai-33l9.onrender.com/summarize", formData, {
+      // 1️⃣ Upload file first
+      await axios.post("https://atlas-ai-33l9.onrender.com/uploads", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setSummary(res.data.answer || "No summary generated."); // backend returns `answer`
+      // 2️⃣ Then call summarize (backend reads stored text from previous step)
+      const res = await axios.post(
+        "https://atlas-ai-33l9.onrender.com/summarize"
+      );
+
+      setSummary(res.data.answer || "No summary generated.");
     } catch (err) {
       console.error(err);
       setSummary("Error summarizing document.");
@@ -67,7 +75,7 @@ const SummaryPage = () => {
       <Button
         variant="contained"
         color="primary"
-        onClick={handleUpload}
+        onClick={handleUploadAndSummarize}
         disabled={isLoading}
       >
         {isLoading ? <CircularProgress size={24} color="inherit" /> : "Upload & Summarize"}
@@ -89,7 +97,7 @@ const SummaryPage = () => {
           </Typography>
           <Typewriter
             words={[summary]}
-            loop={1}      
+            loop={1}
             cursor
             cursorStyle="_"
             typeSpeed={25}
