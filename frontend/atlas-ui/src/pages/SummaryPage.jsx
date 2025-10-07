@@ -23,7 +23,7 @@ const SummaryPage = () => {
 
     setIsLoading(true);
     try {
-      const res = await axios.post("http://localhost:3000/summarize", formData, {
+      const res = await axios.post("https://atlas-ai-33l9.onrender.com/summarize", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 

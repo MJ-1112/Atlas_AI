@@ -18,7 +18,7 @@ const ChatPage = () => {
     setIsLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/ask", {
+      const res = await axios.post("https://atlas-ai-33l9.onrender.com/ask", {
         question: input,
       });
 
