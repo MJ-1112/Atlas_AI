@@ -1,5 +1,6 @@
 import express from "express";
 import { GoogleGenAI } from "@google/genai";
+
 import dotenv from "dotenv";
 import multer from "multer";
 import officeParser from "officeparser";
@@ -11,7 +12,7 @@ console.log("Loaded GEMINI_API_KEY:", process.env.GEMINI_API_KEY ? "✅ Found" :
 
 const app = express();
 
-// ✅ Enable CORS for your deployed frontend
+// ✅ Enable CORS for deployed frontend
 app.use(
   cors({
     origin: "https://atlas-ai-dun.vercel.app",
@@ -23,7 +24,7 @@ app.use(
 app.use(express.json());
 const upload = multer({ dest: "uploads/" });
 
-let text = ""; // Global text memory
+let text = ""; // store file text globally
 
 // 🩺 Health Check
 app.get("/health", (req, res) => {
@@ -36,7 +37,7 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
     const file = req.file;
     if (!file) return res.status(400).json({ message: "No file uploaded" });
 
-    // 🧱 File size check (max 50 MB)
+    // 🧱 File size limit 50MB
     const stats = fs.statSync(file.path);
     const fileSizeMB = stats.size / (1024 * 1024);
     if (fileSizeMB > 50) {
@@ -46,7 +47,8 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
 
     // 📘 PDF file
     if (file.mimetype === "application/pdf") {
-      const { default: pdf } = await import("pdf-parse"); // ✅ ESM-safe dynamic import
+      const pkg = await import("pdf-parse");
+      const pdf = pkg.default || pkg;
       const dataBuffer = fs.readFileSync(file.path);
       const pdfData = await pdf(dataBuffer);
       text = pdfData.text;
@@ -75,22 +77,19 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
 });
 
 // 🤖 Gemini AI Setup
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-});
+const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// 💬 Ask AI Route
+// 💬 Ask AI
 app.post("/ask", async (req, res) => {
   try {
     const { question } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: question,
-    });
+    const response = await ai
+      .getGenerativeModel({ model: "gemini-1.5-flash" })
+      .generateContent(question);
 
-    res.status(200).json({ answer: response.text() });
+    res.status(200).json({ answer: response.response.text() });
   } catch (error) {
     console.error("Ask error:", error);
     res.status(500).json({ error: "Error generating AI response" });
@@ -105,12 +104,11 @@ app.post("/summarize", async (req, res) => {
     const prompt = `Summarize this text in simple language like a teacher explaining to a student. 
     Include bullet points for quick revision:\n\n${text}`;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
-    });
+    const response = await ai
+      .getGenerativeModel({ model: "gemini-1.5-flash" })
+      .generateContent(prompt);
 
-    res.status(200).json({ answer: response.text() });
+    res.status(200).json({ answer: response.response.text() });
   } catch (error) {
     console.error("Summarize error:", error);
     res.status(500).json({ error: "Error generating summary" });
