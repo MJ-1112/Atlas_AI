@@ -3,13 +3,21 @@ import axios from "axios";
 import { Box, Typography, Button, CircularProgress } from "@mui/material";
 import { Typewriter } from "react-simple-typewriter";
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB
+
 const SummaryPage = () => {
   const [file, setFile] = useState(null);
   const [summary, setSummary] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
+    const selected = e.target.files[0];
+    if (selected && selected.size > MAX_FILE_SIZE) {
+      alert("⚠️ File too large! Please select a file under 50 MB.");
+      e.target.value = ""; // reset input
+      return;
+    }
+    setFile(selected);
   };
 
   const handleUploadAndSummarize = async () => {
@@ -22,30 +30,30 @@ const SummaryPage = () => {
     formData.append("file", file);
 
     setIsLoading(true);
-    setSummary(""); // reset old summary
+    setSummary("");
 
     try {
-      // 1️⃣ Upload the file
+      // 1️⃣ Upload file (no manual Content-Type)
       const uploadRes = await axios.post(
         "https://atlas-ai-33l9.onrender.com/uploads",
-        formData,
-        {
-          headers: { "Content-Type": "multipart/form-data" },
-        }
+        formData
       );
-
       console.log("Upload response:", uploadRes.data);
 
-      // 2️⃣ Then summarize (after upload success)
+      // 2️⃣ Summarize
       const summarizeRes = await axios.post(
         "https://atlas-ai-33l9.onrender.com/summarize"
       );
-
       console.log("Summarize response:", summarizeRes.data);
+
       setSummary(summarizeRes.data.answer || "No summary generated.");
     } catch (err) {
       console.error("Upload/Summarize error:", err);
-      setSummary("Error summarizing document. Please try again.");
+      if (err.response?.status === 413) {
+        setSummary("❌ File too large. Max 50 MB allowed.");
+      } else {
+        setSummary("⚠️ Error summarizing document. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,7 +77,7 @@ const SummaryPage = () => {
         Upload your document for summarization
       </Typography>
       <Typography variant="body2" sx={{ color: "#aaa", mb: 2 }}>
-        Only PDF and PPTX files supported
+        Only PDF and PPTX files supported (max 50 MB)
       </Typography>
 
       <input
