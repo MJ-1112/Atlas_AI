@@ -77,7 +77,7 @@ app.post("/uploads", upload.single("file"), async (req, res) => {
 });
 
 // 🤖 Gemini AI Setup
-const ai = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const ai = new GoogleGenAI(process.env.GEMINI_API_KEY);
 
 // 💬 Ask AI
 app.post("/ask", async (req, res) => {
